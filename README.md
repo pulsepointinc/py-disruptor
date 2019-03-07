@@ -36,7 +36,7 @@ Unlike java, c#, and c implementations of disruptors, the python version does li
 * via `requirements.txt`:
     ```
     ...
-    package=version
+    package==version
     ...
     -e https://github.com/pulsepointinc/py-disruptor.git@0.0.1#egg=py-disruptor==0.0.1
     pip install git+https://github.com/myuser/foo.git@v123
