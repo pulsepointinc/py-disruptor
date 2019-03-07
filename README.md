@@ -4,6 +4,8 @@ A **basic**, **unoptimized** multi-threaded RingBuffer - a "[Disruptor](https://
 
 Works with both python2 and python3.
 
+Generally useful for parallelizable io-bound tasks, such as updating a database.
+
 As described [here](http://mechanitis.blogspot.com/2011/07/dissecting-disruptor-writing-to-ring.html), at its core, a Disruptor is:
 
 * A ring buffer into which producers can write elements to while consumers can consume elements from.
@@ -27,7 +29,7 @@ A more traditional approach of accomplishing concurrent consumption would be to 
 
 With a shared, finite ring buffer, these inefficiencies are largely eliminated.  The throghput of data through the disruptor is still limited by the slowest consumer or producer.  Unlike other approaches though, the structure guarantees that while there can be any work done (elements produced or consumed) it *is* being done - rather than various producer or consumer processes sitting idle.  Effectively, a disruptor handles backpressure [really well](https://github.com/LMAX-Exchange/disruptor/wiki/Performance-Results) - especially in a "multicast" (e.g. `1P->3C`) configuration.
 
-Unlike [Java](https://github.com/LMAX-Exchange/disruptor), [.NET](https://github.com/disruptor-net/Disruptor-net), [C++](https://github.com/Abc-Arbitrage/Disruptor-cpp), and [C](https://github.com/systemtrader/c.LMAX-.disruptor) implementations of disruptors, this version does little in the way of "mechanical sympathy" through loading CPU cache lines.  As a side-effect of the gil / python green threads, mechanical sympathy is limited to being able to consume elements in batches.  It's also generally unoptimized and produces a ton of garbage. On the other hand, this version does support:
+Unlike [Java](https://github.com/LMAX-Exchange/disruptor), [.NET](https://github.com/disruptor-net/Disruptor-net), [C++](https://github.com/Abc-Arbitrage/Disruptor-cpp), and [C](https://github.com/systemtrader/c.LMAX-.disruptor) implementations of disruptors, this version does little in the way of "mechanical sympathy" through loading CPU cache lines.  As a side-effect of the gil / python threads, mechanical sympathy is limited to being able to consume elements in batches.  It's also generally unoptimized and produces a ton of garbage. On the other hand, this version does support:
 
 1. producing/consuming big chunks of data at a time.
 2. processing elements outside of any synchronization
