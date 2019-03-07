@@ -4,7 +4,7 @@ A **basic**, **unoptimized** multi-threaded RingBuffer - a "[Disruptor](https://
 
 Works with both python2 and python3, does not support gated consumers.
 
-Generally useful for parallelizable io-bound tasks, such as updating a database.
+Generally useful for parallelizable io-bound tasks, such as updating a database.  Similar to the MP [ringbuffer](https://github.com/bslatkin/ringbuffer) but with threads instead of processes.
 
 As described [here](http://mechanitis.blogspot.com/2011/07/dissecting-disruptor-writing-to-ring.html), at its core, a Disruptor is:
 
