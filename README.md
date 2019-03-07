@@ -23,11 +23,11 @@ As described [here](http://mechanitis.blogspot.com/2011/07/dissecting-disruptor-
 
 This allows for an efficient setup for cases where an individual element needs to be consumed by several consumers at a maximum throughput.
 
-A more traditional approach of accomplishing concurrent consumption would be to have a set of parallel consumers simply consume batches of evelements, with the producer waiting for each batch to be consumed by each consumer.  This works OK when all consumers work at about the same speed, but is inefficient when some consumers/producers work slower than others.  
+A more traditional approach of accomplishing concurrent consumption would be to have a set of parallel consumers simply consume batches of elements, with the producer waiting for each batch to be consumed by each consumer.  This works OK when all consumers work at about the same speed, but is inefficient when some consumers/producers work slower than others.  
 
 With a shared, finite ring buffer, these inefficiencies are largely eliminated.  The throghput of data through the disruptor is still limited by the slowest consumer or producer.  Unlike other approaches though, the structure guarantees that while there can be any work done (elements produced or consumed) it *is* being done - rather than various producer or consumer processes sitting idle.  Effectively, a disruptor handles backpressure [really well](https://github.com/LMAX-Exchange/disruptor/wiki/Performance-Results) - especially in a "multicast" (e.g. `1P->3C`) configuration.
 
-Unlike java, c#, and c implementations of disruptors, the python version does little in the way of mechanical sympathy through loading CPU cache lines.  As a side-effect of the gil / python green threads, mechanical sympathy is limited to being able to consume elements in batches.  On the other hand, this version supports:
+Unlike [Java](https://github.com/LMAX-Exchange/disruptor), [.NET](https://github.com/disruptor-net/Disruptor-net), [C++](https://github.com/Abc-Arbitrage/Disruptor-cpp), and [C](https://github.com/systemtrader/c.LMAX-.disruptor) implementations of disruptors, this version does little in the way of "mechanical sympathy" through loading CPU cache lines.  As a side-effect of the gil / python green threads, mechanical sympathy is limited to being able to consume elements in batches.  It's also generally unoptimized and produces a ton of garbage. On the other hand, this version does support:
 
 1. producing/consuming big chunks of data at a time.
 2. processing elements outside of any synchronization
@@ -83,7 +83,7 @@ finally:
     disruptor.close()
 ```
 
-See [TestDisruptor](tests/test_disruptor.py#137) for more examples
+See [TestDisruptor](tests/test_disruptor.py#L137) for more examples
 
 ### Accessing disruptor statistics
 
