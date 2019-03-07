@@ -1,6 +1,6 @@
 # py-disruptor
 
-A basic multi-threaded RingBuffer - a "[Disruptor](https://lmax-exchange.github.io/disruptor/)-Lite" implementation using a thread-per-consumer model with python threads.
+A **basic** multi-threaded RingBuffer - a "[Disruptor](https://lmax-exchange.github.io/disruptor/)-Lite" implementation using a thread-per-consumer model with python threads.
 
 Works with both python2 and python3.
 
