@@ -2,6 +2,8 @@
 
 A basic multi-threaded RingBuffer - a "[Disruptor](https://lmax-exchange.github.io/disruptor/)-Lite" implementation using a thread-per-consumer model with python threads.
 
+Works with both python2 and python3.
+
 As described [here](http://mechanitis.blogspot.com/2011/07/dissecting-disruptor-writing-to-ring.html), at its core, a Disruptor is:
 
 * A ring buffer into which producers can write elements to while consumers can consume elements from.
