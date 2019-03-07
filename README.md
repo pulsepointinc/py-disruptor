@@ -2,7 +2,7 @@
 
 A **basic**, **unoptimized** multi-threaded RingBuffer - a "[Disruptor](https://lmax-exchange.github.io/disruptor/)-Lite" implementation using a thread-per-consumer model with python threads.
 
-Works with both python2 and python3.
+Works with both python2 and python3, does not support gated consumers.
 
 Generally useful for parallelizable io-bound tasks, such as updating a database.
 
