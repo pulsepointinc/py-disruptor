@@ -42,13 +42,12 @@ Unlike [Java](https://github.com/LMAX-Exchange/disruptor), [.NET](https://github
     ...
     package==version
     ...
-    -e https://github.com/pulsepointinc/py-disruptor.git@0.0.1#egg=py-disruptor==0.0.1
-    pip install git+https://github.com/myuser/foo.git@v123
+    -e git+https://github.com/pulsepointinc/py-disruptor.git@0.0.1#egg=py-disruptor==0.0.1
     ...
     ```
 * via `pip` CLI:
     ```
-    pip install https://github.com/pulsepointinc/py-disruptor.git#egg=py-disruptor==0.0.1
+    pip install git+https://github.com/pulsepointinc/py-disruptor.git@0.0.1#egg=py-disruptor==0.0.1
     ```
 ### Running a disruptor
 
