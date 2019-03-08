@@ -452,8 +452,39 @@ class Disruptor(object):
         while produced < len(elements):
             with self.sync.lock:
                 # figure out maximum number of elements producer can produce
-                can_produce = self.ring_buffer.size - \
-                    (self.producer_seqnum - min(map(lambda c: c.seqnum, self.consumers)))
+                # the producer can produce up to the slowest consumer slot
+                # 
+                # Example:
+                #                         
+                # - Ring size = 30
+                #
+                #                     seq#  ring idx
+                # - Consumer 1 (C1) = 83    13
+                # - Consumer 2 (C2) = 78    8
+                # - Producer seq    = 88    18
+                #
+                #                  C2   C1   P
+                #                  |    |    |
+                # ringidx  00   05 | 10 | 15 | 20   30
+                #          |----|--|-|--|-|--|-|----|
+                # seqnum   70   75 | 80 | 85 | 90   100
+                #                  |    |    |======>
+                #          =======>|    |    |
+                #
+                # The producer can produce up to the slowest consumer's (C2) slot
+                # in the ring (8) - outlined by "==>"
+                #
+                # There's several ways of computing this:
+                # 
+                # * (ring_size - p_idx) + min(C1_idx, C2_idx)
+                #   (30        - 18   ) + 8                  = 20
+                # * ring_size - p_seq + min(C1_seq, C2_seq)
+                #   30        - 88    + 78                   = 20
+                #
+                # This code uses the second approach because it doesn't require
+                # computing an index in the ring buffer.
+                can_produce = self.ring_buffer.size - self.producer_seqnum + \
+                    min(map(lambda c: c.seqnum, self.consumers))
                 if can_produce <= 0:
                     s = self.time_fn()
                     self.sync.await_consumption()
