@@ -327,7 +327,7 @@ class ConsumerThread(object):
     def __init__(self, disruptor, consumer):
         self.disruptor = disruptor
         self.consumer = consumer
-        self.index = disruptor.producer_index
+        self.seqnum = disruptor.producer_seqnum
         self.thread = Thread(
             name='{}_Consumer_{}'.format(disruptor.name, consumer), target=self.run)
         self.thread.start()
@@ -346,10 +346,10 @@ class ConsumerThread(object):
             while available_count == 0 and self.disruptor.running:
                 # atomically check+fetch available data and go to sleep if none
                 with self.disruptor.sync:
-                    available_count = self.disruptor.producer_index - self.index
+                    available_count = self.disruptor.producer_seqnum - self.seqnum
                     if available_count > 0:
                         to_consume = self.disruptor.ring_buffer.mget(
-                            self.index, available_count)
+                            self.seqnum, available_count)
                     else:
                         s = self.disruptor.time_fn()
                         self.disruptor.sync.await_production()
@@ -361,7 +361,7 @@ class ConsumerThread(object):
 
             # re-lock after consumption to update state
             with self.disruptor.sync:
-                self.index = self.index + available_count
+                self.seqnum = self.seqnum + available_count
                 self.disruptor.sync.notify_consumption()
                 available_count = 0
                 to_consume = None
@@ -369,10 +369,10 @@ class ConsumerThread(object):
         # after disruptor stops, consume the rest of available data
         to_consume = None
         with self.disruptor.sync:
-            available_count = self.disruptor.producer_index - self.index
+            available_count = self.disruptor.producer_seqnum - self.seqnum
             if available_count > 0:
                 to_consume = self.disruptor.ring_buffer.mget(
-                    self.index, available_count)
+                    self.seqnum, available_count)
         self._consume_safe(to_consume)
         self.consumer.close()
 
@@ -430,7 +430,7 @@ class Disruptor(object):
         self.stats = DisruptorStats(time_fn)
         self.ring_buffer = RingBuffer(size)
         self.sync = RingSynchronizer()
-        self.producer_index = 0
+        self.producer_seqnum = 0
         self.consumers = []
         self.running = True
 
@@ -451,9 +451,9 @@ class Disruptor(object):
 
         while produced < len(elements):
             with self.sync.lock:
-                # figure out maximum production index
+                # figure out maximum number of elements producer can produce
                 can_produce = self.ring_buffer.size - \
-                    (self.producer_index - min(map(lambda c: c.index, self.consumers)))
+                    (self.producer_seqnum - min(map(lambda c: c.seqnum, self.consumers)))
                 if can_produce <= 0:
                     s = self.time_fn()
                     self.sync.await_consumption()
@@ -461,9 +461,9 @@ class Disruptor(object):
                 else:
                     to_produce_cnt = min(can_produce, len(elements) - produced)
                     self.ring_buffer.mset(
-                        self.producer_index, elements[produced:produced+to_produce_cnt:])
+                        self.producer_seqnum, elements[produced:produced+to_produce_cnt:])
                     produced += to_produce_cnt
-                    self.producer_index += to_produce_cnt
+                    self.producer_seqnum += to_produce_cnt
                     self.sync.notify_production()
 
         self.stats.report_p_produced(produced)
@@ -492,9 +492,9 @@ class Disruptor(object):
         return self
 
     def _unsafe_report_lag(self):
-        if self.producer_index % 10 == 3:
+        if self.producer_seqnum % 10 == 3:
             self.stats.report_ring_lag(
-                self.producer_index - min(map(lambda c: c.index, self.consumers)))
+                self.producer_seqnum - min(map(lambda c: c.seqnum, self.consumers)))
 
     def __str__(self):
         return 'Disruptor-"{}"'.format(self.name)
