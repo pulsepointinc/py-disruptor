@@ -176,7 +176,7 @@ class DisruptorStats(object):
         self.consumer_stats = {}
         self.p_blocked_sec = 0
         self.produced = 0
-        self.ring_lag_stags = RingBufferLagStats()
+        self.ring_lag_stats = RingBufferLagStats()
         self.start_time = time_fn()
         self.end_time = None
 
@@ -225,7 +225,7 @@ class DisruptorStats(object):
         :param lag_size: number of elements slowest consumer is behind producers
         :type lag_size: int
         """
-        self.ring_lag_stags.sample(lag_size)
+        self.ring_lag_stats.sample(lag_size)
 
     def close(self):
         self.end_time = self.time_fn()
@@ -256,7 +256,7 @@ class DisruptorStats(object):
 
     def __str__(self):
         return '\n'.join([
-            'Ring: {}'.format(self.ring_lag_stags),
+            'Ring: {}'.format(self.ring_lag_stats),
             'Producers:',
             ' blocked_sec:{}'.format(self.p_blocked_sec),
             ' produced:{}'.format(self.produced),
